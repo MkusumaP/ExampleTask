@@ -42,10 +42,10 @@ class RecipesListFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.recipesResult.observe(viewLifecycleOwner, Observer {
-            adapter.setData(recipesResult = it)
+        viewModel.recipesList.observe(viewLifecycleOwner, Observer {
+            adapter.setData(it)
         })
-        viewModel.getRecipesList()
+        viewModel.searchRecipe()
     }
 
 }

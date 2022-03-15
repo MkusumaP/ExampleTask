@@ -25,11 +25,11 @@ interface SpoonacularAPI {
     }
 
     @GET("recipes/search")
-    fun getRecipes(
+    suspend fun searchRecipes(
         @Query("apiKey") apiKey: String = SpoonacularConstants.API_KEY,
         @Query("query") query: String = SpoonacularConstants.QUERY,
         @Query("offset") offset: Int = SpoonacularConstants.OFFSET,
         @Query("number") number: Int = SpoonacularConstants.NUMBER
-    ): Call<RecipesResult>
+    ): RecipesResult
 
 }

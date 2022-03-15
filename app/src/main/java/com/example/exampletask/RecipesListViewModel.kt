@@ -2,25 +2,30 @@ package com.example.exampletask
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class RecipesListViewModel: ViewModel() {
+class RecipesListViewModel : ViewModel() {
+    var page = 1
+    val searchRecipeUseCase = SearchRecipeUseCase(SpoonacularRepo(SpoonacularAPI.getInstance()))
 
-    val recipesResult = MutableLiveData<RecipesResult>()
+    val recipesList = MutableLiveData<List<Recipe>>()
     val errorMessage = MutableLiveData<String>()
 
-    fun getRecipesList() {
-        val response = SpoonacularAPI.getInstance().getRecipes()
-        response.enqueue(object : Callback<RecipesResult> {
-            override fun onResponse(call: Call<RecipesResult>, response: Response<RecipesResult>) {
-                recipesResult.postValue(response.body())
-            }
-            override fun onFailure(call: Call<RecipesResult>, t: Throwable) {
-                errorMessage.postValue(t.message)
-            }
-        })
+    fun searchRecipe(isPaginate: Boolean = false) {
+        viewModelScope.launch(Dispatchers.IO) {
+            searchRecipeUseCase(SearchRecipeUseCase.Param(offset = page))
+                .catch { e ->
+                    errorMessage.postValue(e.localizedMessage)
+                }.collectIn(viewModelScope) { pair ->
+                    pair.first.let { recipesList.postValue(it) }
+                }
+        }
     }
 
 }
