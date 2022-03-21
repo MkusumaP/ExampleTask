@@ -20,15 +20,13 @@ data class RecipesResult(
 )
 
 data class Recipe (
-    val id: Long,
+    val id: Int,
     val title: String,
-    val readyInMinutes: Long,
-    val servings: Long,
-
-    @SerializedName(value = "sourceUrl")
-    val sourceURL: String,
-
-    val openLicense: Long,
-    val image: String
+    val readyInMinutes: Int,
+    val servings: Int,
+    val image: String,
+    val isSaved: Boolean
 )
+
+
 

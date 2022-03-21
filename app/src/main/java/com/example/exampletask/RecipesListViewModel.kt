@@ -3,29 +3,39 @@ package com.example.exampletask
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
+import com.example.exampletask.usecase.DeleteSavedRecipeUseCase
+import com.example.exampletask.usecase.SaveRecipeUseCase
+import com.example.exampletask.usecase.SearchRecipeUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import javax.inject.Inject
 
-class RecipesListViewModel : ViewModel() {
+@HiltViewModel
+open class RecipesListViewModel @Inject constructor(
+    val saveRecipeUseCase: SaveRecipeUseCase,
+    val searchRecipeUseCase: SearchRecipeUseCase,
+    val deleteSavedRecipe: DeleteSavedRecipeUseCase
+) : ViewModel() {
     var page = 1
-    val searchRecipeUseCase = SearchRecipeUseCase(SpoonacularRepo(SpoonacularAPI.getInstance()))
-
     val recipesList = MutableLiveData<List<Recipe>>()
     val errorMessage = MutableLiveData<String>()
 
+    private fun saveRecipe(recipe: Recipe) =
+        saveRecipeUseCase(SaveRecipeUseCase.Param(recipe))
+            .collectIn(viewModelScope) {
+                //TODO:
+            }
+
     fun searchRecipe(isPaginate: Boolean = false) {
-        viewModelScope.launch(Dispatchers.IO) {
-            searchRecipeUseCase(SearchRecipeUseCase.Param(offset = page))
-                .catch { e ->
-                    errorMessage.postValue(e.localizedMessage)
-                }.collectIn(viewModelScope) { pair ->
-                    pair.first.let { recipesList.postValue(it) }
-                }
-        }
+        searchRecipeUseCase(SearchRecipeUseCase.Param(offset = page))
+            .catch { e ->
+                errorMessage.postValue(e.localizedMessage)
+            }.collectIn(viewModelScope) { pair ->
+                val recipes = pair.first
+                recipesList.postValue(recipes)
+                recipes.forEach { saveRecipe(it) }
+
+            }
     }
 
 }
