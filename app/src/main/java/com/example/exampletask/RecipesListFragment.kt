@@ -26,7 +26,7 @@ class RecipesListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         viewDataBinding = FragmentRecipesListBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(requireActivity())[RecipesListViewModel::class.java]
+        //viewModel = ViewModelProvider(requireActivity())[RecipesListViewModel::class.java]
         return viewDataBinding.root
     }
 
